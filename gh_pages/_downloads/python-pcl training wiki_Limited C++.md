@@ -15,24 +15,28 @@ source <code>/opt/ros/kinetic/setup.bash</code>
 
 #Intro (Review Existing Code)
 
-Most of the infrastructure for a ros node has already been completed for you; the focus of this exercise is the perception algorithms/pipleline. The <code>CMakelists.txt</code> and <code>package.xml</code> are complete and an executable has been provided. You could run the executable as is, but you would get errors. At this time we will explore the source code that has been provided - browse the provided <code>perception_node.cpp</code> file. This tutorial is a follow on to training <a href="Exercise 5.1 Building a Perception Pipeline" target="http://ros-industrial.github.io/industrial_training/_source/session5/Building-a-Perception-Pipeline.html">Exercise 5.1 Building a Perception Pipeline</a> and as such the C++ code has already been set up.  Open up the preception_node.cpp file and look over the filtering functions.
+Most of the infrastructure for a ros node has already been completed for you; the focus of this exercise is the perception algorithms/pipleline. The <code>CMakelists.txt</code> and <code>package.xml</code> are complete and an executable has been provided. You could run the executable as is, but you would get errors. At this time we will explore the source code that has been provided - browse the provided <code>perception_node.cpp</code> file. This tutorial is a follow up to training <a href="Exercise 5.1 Building a Perception Pipeline" target="http://ros-industrial.github.io/industrial_training/_source/session5/Building-a-Perception-Pipeline.html">Exercise 5.1 Building a Perception Pipeline</a> and as such the C++ code has already been set up.  Open up the preception_node.cpp file and look over the filtering functions.
 
 #Create a Python node
 
-Now that we have converted several filters to C++ functions, we are ready to call it from a Python node.  If you have not done so already, install PyCharm, community edition.
+Now that we have converted several filters to C++ functions, we are ready to call it from a Python node.  If you have not done so already, install PyCharm, community edition. <u>Maybe say if desired? Because it is not necessary</>
 
-1.	Create a new project inside your perception_ws. In the terminal source to your src folder:
-<pre><code>
+1.	Create a new package inside your perception_ws. In the terminal, change directory to your src folder:
+    <pre><code>
 $ cd ~/perception_ws/src/
-$ catkin_create_pkg filter_call rospy roscpp perception_msgs</code></pre>
+$ catkin_create_pkg filter_call rospy roscpp perception_msgs</code></pre> 
+
+    <u>Using catkin_make instead of catkin_tools? i.e. "catkin_create_pkg" instead of "catkin create pkg". I think the rest of tutorials use catkin_tools. Still works, regardless.</u>
+    
+    <u>\*Returning back to this point after going further in the tutorial, I have issues finding perception_msgs. It throws an error, but it can find sensor_msgs, which seems to be the message package we are depending on anyway. Currently working having swapped the two<u>
 
 2.	Check that your package was created:
-<pre><code>
+    <pre><code>
 $ ls</code></pre>
 
-You can open the file in Pycharm or QT (or you can use nano, emacs, vim, or sublime)
+    You can open the file in Pycharm or QT (or you can use nano, emacs, vim, or sublime)
 
-3.	Edit line 2 to define the name of the project:
+3.	Edit line 2 of CMakesList.txt to define the name of the project:
 <pre><code>
 $ project(filter_call)</code></pre>
 
@@ -44,10 +48,12 @@ roscpp
 rospy
 )</code></pre>
 
+    <u>The last two steps should be unecessary if the user typed in the catkin_create_pkg command correctly as those lines will already be filled correctly into the CMakeLists<u>
 
-Specify the packages your package depends on.  We will not be using ‘perception_msgs’ as we will not be creating custom messages in this course.  It is included for further student knowledge. If you wish for a more in depth explanation including how to implement customer messages, here is a good <a href="MIT resource" target="http://duckietown.mit.edu/media/pdfs/1rpRisFoCYUm0XT78j-nAYidlh-cDtLCdEbIaBCnx9ew.pdf">MIT resource</a> on the steps taken
 
-5.	Line 20, uncomment and save.
+    Specify the packages your package depends on.  *We will not be using ‘perception_msgs’ as we will not be creating custom messages in this course.* <-- <u>Self contrdicting sentence. I'm not sure what is correct.</u> It is included for further student knowledge. If you wish for a more in depth explanation including how to implement custom messages, here is a good <a href="MIT resource" target="http://duckietown.mit.edu/media/pdfs/1rpRisFoCYUm0XT78j-nAYidlh-cDtLCdEbIaBCnx9ew.pdf">MIT resource</a> on the steps taken
+
+5.	Uncomment line 23 and save.
 <pre><code>
 catkin_python_setup()</code></pre>
 
@@ -55,9 +61,15 @@ catkin_python_setup()</code></pre>
 <pre><code>
 <description>The lesson_perception package</description></code></pre>
 
+    <u>I don't think this is correct. This is not the lesson_preception package. I believe this should be left unchanged</u>
+
 7.	Update your <build_depend> and <run_depend> to reflect roscpp, rospy, and perception_msgs.
 
+    <u>Again, this should already have been done in the initial creation of the package</u>
+
 8.	Save and close the file.
+
+    <u>Overall, it seems that package.xml should not need any initial edits<u>
 
 #<big>Creating setup.py</big>
 
@@ -67,35 +79,36 @@ The <code>setup.py</code> file makes your python module available to the entire 
 <pre><code>
 $ nano filter_call/setup.py</code></pre>
 
+    <u>Maybe say create the file and edit it instead of specifying nano?</u>
+
 2.	Copy and paste the following to the setup.py file (to paste into a terminal, Ctrl+Shift+V)
 
-<pre><code>
+```python
 ## ! DO NOT MANUALLY INVOKE THIS setup.py, USE CATKIN INSTEAD
 from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
-packages=['<package_name>'],
+packages=[''],
 package_dir={'': 'include'},
 )
-setup(**setup_args)</code></pre>
+setup(**setup_args)
+```
 
 
-change <code>packages = [ . . . ],</code> to your list of strings of the name of the folders inside your ‘include’ folder.  By convention, these should be the same name.  The configures ‘filter_call’/include/filter_call as a python module available to the whole workspace.
+Change <code>packages=[''],</code> to your list of strings of the name of the folders inside your *include* folder.  By convention, this will be the same name as the package <code>'filter_call'</code> . *The configures ‘filter_call’/include/filter_call as a python module available to the whole workspace.* <-- <u>What do you mean by this?</u>
 
 3.	Save and close the file.
 
-In order for this folder to be treated as a python module, the <code>__init__.py</code> file must exist.
+    In order for this folder to be treated as a python module, the <code>\__init__.py</code> file must exist.
 
 4.	Create one in the terminal by typing:
-<pre><code>
-$ touch filter_call/include/filter_call/__init__.py</code></pre>
-
-Where <code>__init__.py</code> is two underscores on either side.
+    <pre><code>
+$ touch filter_call/include/filter_call/\__init__.py</code></pre>
 
 5.	Now we are ready to start developing the client node to call our C++ service.  Create a service called ‘FilterCloud.srv’ as outlined in Section 2.0, updating the <code>CMakeLists.txt</code> and the <code>package.xml</code> file respectively.  Copy and paste the following into the file.
 
-<pre><code>
+```
 #request
 sensor_msgs/PointCloud2 input_cloud
 string topic
@@ -119,10 +132,11 @@ byte operation
 ---
 #response
 sensor_msgs/PointCloud2 output_cloud
-bool success</code></pre>
+bool success
+```
 
 
-Be sure to include the header file associated with this service.
+*Be sure to include the header file associated with this service.* <-- <u>Where? perception_node.cpp?</u>
 
 #Publishing the Point Cloud
 
@@ -131,11 +145,11 @@ As iterated before, we are creating a ROS C++ node to publish the point cloud an
 
 #<big>Implement a Voxel Filter</big>
 
-Create a Boolean called <code>filterCallBack()</code> the brings in the service.  This will be used by the python client to run subsequent filtering operations.
+In perception_node.cpp in the lesson_perception package, create a function called <code>filterCallBack()</code> that performs the service. This will be used by the python client to run filtering operations.
 
-1.	Above your <code>main:</code>, after your filter declarations, copy and paste the code below.
+1.	Above your <code>main</code>, after your filter includes, uncomment the code below.
 
-<pre><code>
+```c++
 bool filterCallback(lesson_perception::FilterCloud::Request& request,
                     lesson_perception::FilterCloud::Response& response)
 {
@@ -144,7 +158,7 @@ bool filterCallback(lesson_perception::FilterCloud::Request& request,
   if (request.pcdfilename.empty())
   {
     pcl::fromROSMsg(request.input_cloud, *cloud);
-    ROS_INFO_STREAM("cloud size: " <<cloud->size());
+    ROS_INFO_STREAM("cloud size: " << cloud->size());
     if (cloud->empty())
     {
       ROS_ERROR("input cloud empty");
@@ -159,24 +173,11 @@ bool filterCallback(lesson_perception::FilterCloud::Request& request,
     //response.output_cloud.header.frame_id="kinect_link";
   }
 
-  switch (request.operation)
-  {
-
-    case lesson_perception::FilterCloud::Request::VOXELGRID :
-    {
-      filtered_cloud = voxelGrid(cloud, 0.01);
-      break;
-    }
-    default :
-    {
-      ROS_ERROR("no point cloud found");
-      return false;
-    }
-
-   }</code></pre>
+}
+```
 
 
-Now that we have the framework for the filtering, save the file and open your filter_call.py and find:
+Now that we have the framework for the filtering, save the file and open your *filter_call.py* <-- <u>From where?</u> and find:
 
 <pre><code>
         # =======================
